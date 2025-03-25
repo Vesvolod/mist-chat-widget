@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mist Jarvis SDK 4.5</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+    .block {
+      max-width: 600px;
+      margin: auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+    }
+    button {
+      padding: 10px 16px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="block">
+    <h2>🧠 Mist Jarvis SDK 4.5</h2>
+    <p>Ожидание инициализации от Kommo...</p>
+    <div id="result" style="margin-top:20px;"></div>
+  </div>
+
+  <script>
+    window.KommoWidget = {
+      init: async function(app) {
+        const context = await app.context();
+        console.log("Контекст получен:", context);
+
+        const analysis = await fetch("https://mist-chat-widget-production.up.railway.app/messages/" + context.id)
+          .then(r => r.json())
+          .then(data => fetch("https://mist-chat-widget-production.up.railway.app/analyze", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ messages: data.messages })
+          }).then(res => res.json()))
+          .catch(() => null);
+
+        if (!analysis) {
+          return app.render({ html: "<div style='color:red;'>❌ Ошибка анализа. Проверь подключение.</div>" });
+        }
+
+        app.render({
+          html: `
+            <h3>Анализ по сделке #${context.id}</h3>
+            <pre>
+<b>Цели:</b> ${analysis.goals}
+<b>Сомнения:</b> ${analysis.doubts}
+<b>Ответы менеджера:</b> ${analysis.manager_score}
+<b>Рекомендации:</b> ${analysis.recommendation}
+            </pre>`
+        });
+      }
+    };
+  </script>
+</body>
+</html>
