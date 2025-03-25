@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mist Jarvis</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+    }
+    h2 {
+      margin-top: 0;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 16px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🧠 Mist Jarvis</h2>
+    <p>Анализатор чатов в Kommo</p>
+    <button id="analyze">Анализировать диалог</button>
+    <div id="result" style="margin-top: 20px;"></div>
+  </div>
+
+  <script>
+    async function getEntityId() {
+      return new Promise((resolve) => {
+        if (window.Kommo) {
+          Kommo.context().then(ctx => {
+            console.log('Контекст Kommo:', ctx);
+            resolve(ctx?.id || null);
+          }).catch(() => resolve(null));
+        } else {
+          resolve(null);
+        }
+      });
+    }
+
+    async function fakeAnalyze(id) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({
+            goals: "Уточнить площадь, тип заведения и потребность в охлаждении.",
+            doubts: "Цена, сроки установки, как работает система.",
+            manager_score: "Ответы краткие, без закрытия возражений.",
+            recommendation: "Задать уточняющие вопросы, предложить 1-2 кейса и назначить встречу."
+          });
+        }, 800);
+      });
+    }
+
+    document.getElementById("analyze").addEventListener("click", async () => {
+      const button = document.getElementById("analyze");
+      const result = document.getElementById("result");
+      button.disabled = true;
+      result.innerHTML = "<i>⏳ Анализируем...</i>";
+
+      const entityId = await getEntityId();
+      if (!entityId) {
+        result.innerHTML = "❌ Не удалось определить ID сделки или лида.";
+        button.disabled = false;
+        return;
+      }
+
+      const analysis = await fakeAnalyze(entityId);
+      result.innerHTML = `
+        <h4>🧾 Анализ сделки #${entityId}:</h4>
+        <pre><b>Цели:</b> ${analysis.goals}
+<b>Сомнения:</b> ${analysis.doubts}
+<b>Оценка:</b> ${analysis.manager_score}
+<b>Рекомендации:</b> ${analysis.recommendation}</pre>
+      `;
+      button.disabled = false;
+    });
+  </script>
+</body>
+</html>
