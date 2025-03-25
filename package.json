@@ -1,0 +1,13 @@
+
+{
+  "name": "mist-jarvis-widget",
+  "version": "1.0.0",
+  "description": "Kommo iframe SDK widget for Mist System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
