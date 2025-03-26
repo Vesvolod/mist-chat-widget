@@ -15,22 +15,24 @@ module.exports = async (req, res) => {
     const { message } = JSON.parse(body);
 
     const prompt = `
-Ты — AI-ассистент для CRM-системы. Получаешь переписку с клиентом и должен:
-1. Определить язык переписки
-2. Кратко проанализировать цель клиента, его сомнения и фазу диалога
-3. Сгенерировать вежливый и уместный ответ на том же языке
-4. Дать рекомендации для менеджера по следующему действию в продажах
+You are a smart AI assistant integrated into a CRM. Your job is to process a conversation with a client and return the following:
 
-Переписка:
-"""${message}"""
+1. Automatically detect the language (e.g., English, Russian, etc.)
+2. Briefly analyze the client's intent, doubts, and current sales stage (lead, warm-up, decision)
+3. Generate a polite and effective response for the client in the same language
+4. Provide clear sales recommendations for the manager
 
-Верни ответ строго в формате:
+Return your output **strictly** as a JSON like this:
+
 {
-  "language": "английский",
-  "analysis": "...",
-  "reply": "...",
-  "sales_recommendation": "..."
+  "language": "Русский",
+  "analysis": "Клиент интересуется системой, но не уверен, нужна ли она сейчас. Он на этапе принятия решения.",
+  "reply": "Здравствуйте! Спасибо за интерес к нашей системе. Готов ответить на любые вопросы или провести демонстрацию — как вам будет удобно?",
+  "sales_recommendation": "Предложить бесплатную демонстрацию, затем зафиксировать воронку как 'переговоры'"
 }
+
+Here is the full conversation:
+"""${message}"""
 `;
 
     const openaiRes = await axios.post('https://api.openai.com/v1/chat/completions', {
@@ -46,12 +48,15 @@ module.exports = async (req, res) => {
 
     const content = openaiRes.data.choices[0].message.content;
 
-    // Попробуем распарсить как JSON
+    // Попробуем безопасно распарсить JSON
     let parsed;
     try {
       parsed = JSON.parse(content);
     } catch {
-      parsed = { reply: content }; // если невалидный JSON, просто вернём текст
+      parsed = {
+        reply: content,
+        error: "⚠️ Ответ не удалось распарсить как JSON"
+      };
     }
 
     res.status(200).json(parsed);
