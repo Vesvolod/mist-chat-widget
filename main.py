@@ -10,7 +10,7 @@ load_dotenv()
 app = FastAPI()
 
 # Инициализация ключей API из переменных окружения
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("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")
 
 @app.get("/")
 async def root():
