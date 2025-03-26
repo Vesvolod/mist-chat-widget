@@ -27,7 +27,7 @@ ${conversation}`;
         messages: [{ role: 'user', content: prompt }]
       }, {
         headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Authorization': `Bearer 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`,
           'Content-Type': 'application/json'
         }
       });
