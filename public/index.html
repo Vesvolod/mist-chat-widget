@@ -7,7 +7,7 @@
 <body>
   <h3>Mist ChatGPT Kommo Widget Test</h3>
 
-  <textarea id="conversation" rows="10" cols="70" placeholder="Вставь сообщение клиента"></textarea><br>
+  <textarea id="conversation" rows="10" cols="70" placeholder="Вставь переписку"></textarea><br>
   <button id="analyzeButton">Проанализировать</button>
 
   <pre id="result"></pre>
@@ -28,8 +28,7 @@
         });
 
         const data = await res.json();
-
-        console.log('📦 Ответ от сервера:', data); // <-- увидишь в F12 → Console
+        console.log('📦 Ответ от сервера:', data);
 
         if (data.reply) {
           resultBox.textContent = data.reply;
