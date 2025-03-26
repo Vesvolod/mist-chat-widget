@@ -2,23 +2,36 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Mist ChatGPT Kommo Widget Test</title>
+  <title>Mist ChatGPT Kommo Widget</title>
 </head>
 <body>
-  <h3>Mist ChatGPT Kommo Widget Test</h3>
+  <h3>Mist Jarvis: AI-ассистент для Kommo</h3>
 
-  <textarea id="conversation" rows="10" cols="70" placeholder="Вставь сообщение клиента"></textarea><br>
+  <textarea id="conversation" rows="10" cols="70" placeholder="Вставь переписку клиента..."></textarea><br>
   <button id="analyzeButton">Проанализировать</button>
 
-  <pre id="result"></pre>
+  <h4>🌐 Язык:</h4>
+  <pre id="lang"></pre>
+
+  <h4>📊 Анализ:</h4>
+  <pre id="analysis"></pre>
+
+  <h4>💬 Ответ для клиента:</h4>
+  <pre id="reply"></pre>
+
+  <h4>📈 Рекомендация по продажам:</h4>
+  <pre id="recommendation"></pre>
 
   <script>
     document.getElementById('analyzeButton').addEventListener('click', analyze);
 
     async function analyze() {
       const message = document.getElementById('conversation').value;
-      const resultBox = document.getElementById('result');
-      resultBox.textContent = '⏳ Генерирую ответ...';
+
+      document.getElementById('lang').textContent = '⏳...';
+      document.getElementById('analysis').textContent = '';
+      document.getElementById('reply').textContent = '';
+      document.getElementById('recommendation').textContent = '';
 
       try {
         const res = await fetch('/api/analyze', {
@@ -28,17 +41,13 @@
         });
 
         const data = await res.json();
-        console.log('📦 Ответ от сервера:', data);
 
-        if (data.reply) {
-          resultBox.textContent = data.reply;
-        } else if (data.error) {
-          resultBox.textContent = `❌ Ошибка: ${data.error}`;
-        } else {
-          resultBox.textContent = '⚠️ Ответ получен, но пустой.';
-        }
+        document.getElementById('lang').textContent = data.language || 'Не определён';
+        document.getElementById('analysis').textContent = data.analysis || '–';
+        document.getElementById('reply').textContent = data.reply || '–';
+        document.getElementById('recommendation').textContent = data.sales_recommendation || '–';
       } catch (err) {
-        resultBox.textContent = `🚨 JS ошибка: ${err.message}`;
+        document.getElementById('lang').textContent = `Ошибка: ${err.message}`;
       }
     }
   </script>
