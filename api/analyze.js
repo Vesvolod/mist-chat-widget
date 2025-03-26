@@ -1,13 +1,19 @@
 const axios = require('axios');
-const bodyParser = require('body-parser');
 
 module.exports = async (req, res) => {
-  bodyParser.json()(req, res, async () => {
-    if (req.method === 'POST') {
-      const { conversation } = req.body;
+  if (req.method === 'POST') {
+    try {
+      let body = '';
 
-      try {
-        const prompt = `Проанализируй переписку с клиентом и предоставь краткий отчёт:
+      // Собираем тело запроса вручную
+      await new Promise((resolve) => {
+        req.on('data', chunk => { body += chunk });
+        req.on('end', resolve);
+      });
+
+      const { conversation } = JSON.parse(body);
+
+      const prompt = `Проанализируй переписку с клиентом и дай краткий отчёт:
 1. Цель клиента
 2. Сомнения клиента
 3. Оценка действий менеджера
@@ -16,21 +22,21 @@ module.exports = async (req, res) => {
 Переписка:
 ${conversation}`;
 
-        const openaiRes = await axios.post('https://api.openai.com/v1/chat/completions', {
-          model: 'gpt-3.5-turbo',
-          messages: [{ role: 'user', content: prompt }]
-        }, {
-          headers: {
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-          }
-        });
+      const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }]
+      }, {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-        res.json({ analysis: openaiRes.data.choices[0].message.content });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
-      }
-    } else {
-      res.status(405).send('Method Not Allowed');
+      res.status(200).json({ analysis: response.data.choices[0].message.content });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-  });
+  } else {
+    res.status(405).json({ error: 'Method Not Allowed' });
+  }
 };
