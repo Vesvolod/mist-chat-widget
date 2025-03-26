@@ -2,24 +2,34 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Mist Chat Widget Test</title>
+  <title>Mist ChatGPT Kommo Widget Test</title>
 </head>
 <body>
   <h3>Mist ChatGPT Kommo Widget Test</h3>
-  <textarea id="conversation" rows="10" cols="50" placeholder="Вставь переписку"></textarea><br>
+  <textarea id="conversation" rows="10" cols="70" placeholder="Вставь сообщение клиента"></textarea><br>
   <button onclick="analyze()">Проанализировать</button>
   <pre id="result"></pre>
 
   <script>
     async function analyze() {
-      const conversation = document.getElementById('conversation').value;
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversation })
-      });
-      const data = await res.json();
-      document.getElementById('result').textContent = data.analysis || data.error;
+      const message = document.getElementById('conversation').value;
+      if (!message.trim()) {
+        document.getElementById('result').textContent = "⚠️ Введите сообщение клиента.";
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+
+        const data = await res.json();
+        document.getElementById('result').textContent = data.reply || data.error || "Нет ответа.";
+      } catch (err) {
+        document.getElementById('result').textContent = `Ошибка: ${err.message}`;
+      }
     }
   </script>
 </body>
